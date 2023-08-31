@@ -1,0 +1,20 @@
+{
+  "name": "databasemc",
+  "version": "1.0.0",
+  "description": "統合版マインクラフトのScriptAPIで利用可能なデータベースです。",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nano191225/DatabaseMC.git"
+  },
+  "author": "Nano191225",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Nano191225/DatabaseMC/issues"
+  },
+  "homepage": "https://github.com/Nano191225/DatabaseMC#readme"
+}

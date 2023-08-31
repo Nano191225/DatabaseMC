@@ -69,5 +69,29 @@ world.afterEvents.chatSend.subscribe((chatSend) => {
             "!size",
             "!forEach",
         ].join("\n"));
+    } else if (command === "!max") {
+        if (key === "keys") {
+            for (let i = 1; i < 2 ** 10; i++) {
+                try {
+                    db.delete("A".repeat(i - 1));
+                    db.set("A".repeat(i), i);
+                } catch (e) {
+                    console.error(e);
+                    player.sendMessage(`Max keys: ${i - 1}`);
+                    break;
+                }
+            }
+        } else if (key === "values") {
+            for (let i = 1; i < 2 ** 16; i++) {
+                try {
+                    db.delete("A");
+                    db.set("A", "A".repeat(i));
+                } catch (e) {
+                    console.error(e);
+                    player.sendMessage(`Max values: ${i - 1}`);
+                    break;
+                }
+            }
+        }
     }
 });

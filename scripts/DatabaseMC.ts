@@ -1,5 +1,8 @@
 import { world, ScoreboardObjective } from "@minecraft/server";
 
+const MAX_KEY_LENGTH = 512;
+const MAX_VALUE_LENGTH = 32254;
+
 class Database extends Map {
     constructor(name: string) {
         super();
@@ -24,6 +27,9 @@ export class ScoreboardDatabase extends Database {
         this.#name = name.slice(0, 11) + "_dbMC";
 
         this.reload();
+
+        if (2**15 - MAX_KEY_LENGTH - MAX_VALUE_LENGTH - 2 < 0)
+            throw new RangeError("The maximum number of entries has been exceeded");
     }
 
     /**
@@ -57,12 +63,19 @@ export class ScoreboardDatabase extends Database {
      * @returns ScoreboardDatabase
      */
     public set(key: string, value: any): this {
+        if (this.size >= 2**15)
+            throw new RangeError("The maximum number of entries has been exceeded");
+
         this.#keyCheck(key);
+        const string = JSON.stringify(value);
+
+        if (string.length > MAX_VALUE_LENGTH)
+            throw new RangeError(`Value must be ${MAX_VALUE_LENGTH} (now ${string.length}) characters or less (after JSON.stringify)`);
 
         this.delete(key);
 
         const object = this.#getObject();
-        object.setScore(key + "§:" + JSON.stringify(value), 0);
+        object.setScore(key + "§:" + string, 0);
         super.set(key, value);
 
         return this;
@@ -83,10 +96,7 @@ export class ScoreboardDatabase extends Database {
 
     public clear(): void {
         const object = this.#getObject();
-        const participants = object.getParticipants();
-        for (const participant of participants) {
-            object.removeParticipant(participant);
-        }
+        world.scoreboard.removeObjective(object);
 
         super.clear();
     }
@@ -98,8 +108,8 @@ export class ScoreboardDatabase extends Database {
             throw new TypeError(
                 "Key must only contain alphanumeric characters and underscores"
             );
-        if (key.length > 16)
-            throw new RangeError("Key must be 16 characters or less");
+        if (key.length > MAX_KEY_LENGTH)
+            throw new RangeError(`Key must be ${MAX_KEY_LENGTH} characters or less`);
     }
 
     #getObject(): ScoreboardObjective {

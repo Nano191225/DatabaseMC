@@ -1,7 +1,14 @@
-import { world, ScoreboardObjective } from "@minecraft/server";
+import {
+    world,
+    ScoreboardObjective,
+    Player,
+    DynamicPropertiesDefinition,
+    MinecraftEntityTypes,
+} from "@minecraft/server";
 
 const MAX_KEY_LENGTH = 512;
 const MAX_VALUE_LENGTH = 32254;
+const PLAYER_PROPERTIES: string[] = [];
 
 class Database extends Map {
     constructor(name: string) {
@@ -28,8 +35,10 @@ export class ScoreboardDatabase extends Database {
 
         this.reload();
 
-        if (2**15 - MAX_KEY_LENGTH - MAX_VALUE_LENGTH - 2 < 0)
-            throw new RangeError("The maximum number of entries has been exceeded");
+        if (2 ** 15 - MAX_KEY_LENGTH - MAX_VALUE_LENGTH - 2 < 0)
+            throw new RangeError(
+                "The maximum number of entries has been exceeded"
+            );
     }
 
     /**
@@ -63,14 +72,18 @@ export class ScoreboardDatabase extends Database {
      * @returns ScoreboardDatabase
      */
     public set(key: string, value: any): this {
-        if (this.size >= 2**15)
-            throw new RangeError("The maximum number of entries has been exceeded");
+        if (this.size >= 2 ** 15)
+            throw new RangeError(
+                "The maximum number of entries has been exceeded"
+            );
 
         this.#keyCheck(key);
         const string = JSON.stringify(value);
 
         if (string.length > MAX_VALUE_LENGTH)
-            throw new RangeError(`Value must be ${MAX_VALUE_LENGTH} (now ${string.length}) characters or less (after JSON.stringify)`);
+            throw new RangeError(
+                `Value must be ${MAX_VALUE_LENGTH} (now ${string.length}) characters or less (after JSON.stringify)`
+            );
 
         this.delete(key);
 
@@ -88,7 +101,7 @@ export class ScoreboardDatabase extends Database {
         const object = this.#getObject();
         const participants = object.getParticipants();
         const participant = participants.find(
-            participant => participant.displayName.split("§:")[0] === key
+            (participant) => participant.displayName.split("§:")[0] === key
         );
         if (!participant) return false;
         return object.removeParticipant(participant);
@@ -109,7 +122,9 @@ export class ScoreboardDatabase extends Database {
                 "Key must only contain alphanumeric characters and underscores"
             );
         if (key.length > MAX_KEY_LENGTH)
-            throw new RangeError(`Key must be ${MAX_KEY_LENGTH} characters or less`);
+            throw new RangeError(
+                `Key must be ${MAX_KEY_LENGTH} characters or less`
+            );
     }
 
     #getObject(): ScoreboardObjective {
@@ -123,3 +138,53 @@ export class ScoreboardDatabase extends Database {
         }
     }
 }
+
+export class PlayerPropertyDatabase extends Database {
+    #name: string;
+    constructor(name: string) {
+        super(name);
+        this.#name = name.slice(0, 11) + "_dbMC";
+
+        if (!PLAYER_PROPERTIES.includes(this.#name))
+            throw new ReferenceError("Property is not registered");
+        // this.reload();
+    }
+
+    public reload(): this {
+        for (const player of world.getAllPlayers()) {
+            const value = player.getDynamicProperty(this.#name) as string;
+            if (typeof value !== "string" || typeof value !== "undefined")
+                throw new ReferenceError("Value must be string or undefined");
+            if (value) super.set(player.id, JSON.parse(value));
+        }
+        return this;
+    }
+
+    public get(key: Player): any | undefined {
+        // return key.getDynamicProperty(this.#name);
+        return super.get(key.id);
+    }
+
+    public set(key: Player, value: any): this {
+        key.setDynamicProperty(this.#name, JSON.stringify(value));
+        super.set(key.id, value);
+        return this;
+    }
+
+    static register(name: string): void {
+        PLAYER_PROPERTIES.push(name);
+    }
+}
+
+world.afterEvents.worldInitialize.subscribe((worldInitialize) => {
+    const player = new DynamicPropertiesDefinition();
+
+    PLAYER_PROPERTIES.forEach((property) => {
+        player.defineString(property, MAX_VALUE_LENGTH);
+    });
+
+    worldInitialize.propertyRegistry.registerEntityTypeDynamicProperties(
+        player,
+        MinecraftEntityTypes.player
+    );
+});

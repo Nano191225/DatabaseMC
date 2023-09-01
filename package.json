@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Nano191225/DatabaseMC/issues"
   },
-  "homepage": "https://github.com/Nano191225/DatabaseMC#readme"
+  "homepage": "https://github.com/Nano191225/DatabaseMC#readme",
+  "dependencies": {
+    "@minecraft/server": "^1.4.0-beta.1.20.10-stable"
+  }
 }

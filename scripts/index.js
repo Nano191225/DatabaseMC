@@ -1,1 +1,2 @@
-import "./example/scoreboard";
+import "./example/scoreboard"
+import "./example/player.property";

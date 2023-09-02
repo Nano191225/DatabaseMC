@@ -1,21 +1,21 @@
 import { system, world } from "@minecraft/server";
-import { PlayerPropertyDatabase } from "../DatabaseMC.js";
+import { WorldPropertyDatabase } from "../DatabaseMC.js";
 
-PlayerPropertyDatabase.register("test");
+WorldPropertyDatabase.register("test");
 
 world.afterEvents.chatSend.subscribe((chatSend) => {
     const { sender: player, message } = chatSend;
-    if (!message.startsWith("#")) return;
+    if (!message.startsWith(".")) return;
     const args = message.split(" ");
     const command = args[0];
-    const key = player;
-    const value = args.slice(1).join(" ");
-    console.warn(command, player.id, value);
-    const db = new PlayerPropertyDatabase("test");
-    if (command === "#set") {
+    const key = args[1];
+    const value = args.slice(2).join(" ");
+    console.warn(command, key, value);
+    const db = new WorldPropertyDatabase("test");
+    if (command === ".set") {
         db.set(key, value);
     }
-    else if (command === "#get") {
+    else if (command === ".get") {
         const value = db.get(key);
         if (value !== undefined) {
             player.sendMessage(value);
@@ -24,7 +24,7 @@ world.afterEvents.chatSend.subscribe((chatSend) => {
             player.sendMessage("Key not found");
         }
     }
-    else if (command === "#delete") {
+    else if (command === ".delete") {
         const success = db.delete(key);
         if (success) {
             player.sendMessage("Key deleted");
@@ -33,56 +33,67 @@ world.afterEvents.chatSend.subscribe((chatSend) => {
             player.sendMessage("Key not found");
         }
     }
-    else if (command === "#reload") {
+    else if (command === ".reload") {
         db.reload();
     }
-    else if (command === "#keys") {
+    else if (command === ".keys") {
         player.sendMessage([...db.keys()].join(", "));
     }
-    else if (command === "#values") {
+    else if (command === ".values") {
         player.sendMessage([...db.values()].join(", "));
     }
-    else if (command === "#entries") {
+    else if (command === ".entries") {
         player.sendMessage([...db.entries()].map(([key, value]) => `${key}: ${value}`).join(", "));
     }
-    else if (command === "#clear") {
+    else if (command === ".clear") {
         db.clear();
     }
-    else if (command === "#has") {
+    else if (command === ".has") {
         player.sendMessage(db.has(key).toString());
     }
-    else if (command === "#size") {
+    else if (command === ".size") {
         player.sendMessage(db.size.toString());
     }
-    else if (command === "#forEach") {
+    else if (command === ".forEach") {
         db.forEach((value, key) => {
             player.sendMessage(`${key}: ${value}`);
         });
     }
-    else if (command === "#help") {
+    else if (command === ".help") {
         player.sendMessage([
-            "#set <key> <value>",
-            "#get <key>",
-            "#delete <key>",
-            "#reload",
-            "#keys",
-            "#values",
-            "#entries",
-            "#clear",
-            "#has <key>",
-            "#size",
-            "#forEach",
+            ".set <key> <value>",
+            ".get <key>",
+            ".delete <key>",
+            ".reload",
+            ".keys",
+            ".values",
+            ".entries",
+            ".clear",
+            ".has <key>",
+            ".size",
+            ".forEach",
         ].join("\n"));
-    } else if (command === "#max") {
-        if (value === "values") {
-            let integer = 1;
+    } else if (command === ".max") {
+        if (key === "keys") {
+            for (let i = 1; i < 2 ** 10; i++) {
+                try {
+                    db.delete("A".repeat(i - 1));
+                    db.set("A".repeat(i), i);
+                } catch (e) {
+                    console.error(e);
+                    player.sendMessage(`Max keys: ${i - 1}`);
+                    break;
+                }
+            }
+        } else if (key === "values") {
+            let integer = 1000000;
             const interval = system.runInterval(() => {
                 const start = Date.now();
                 for (let i = integer; i < 2 ** 20; i++) {
                     integer = i + 1;
                     try {
-                        db.delete(player);
-                        db.set(player, "A".repeat(i));
+                        db.delete("A");
+                        db.set("A", "A".repeat(i));
                     } catch (e) {
                         console.error(e);
                         player.sendMessage(`Max values: ${i - 1}`);

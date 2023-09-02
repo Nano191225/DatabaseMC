@@ -3,6 +3,7 @@ import { ScoreboardDatabase } from "../DatabaseMC.js";
 
 world.afterEvents.chatSend.subscribe((chatSend) => {
     const { sender: player, message } = chatSend;
+    if (!message.startsWith("!")) return;
     const args = message.split(" ");
     const command = args[0];
     const key = args[1];

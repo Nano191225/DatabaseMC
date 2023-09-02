@@ -1,8 +1,8 @@
 # DatabaseMC
 
-このデータベースは、統合版マインクラフトのScript APIで利用可能なデータベースです。
+このデータベースは、統合版マインクラフトの Script API で利用可能なデータベースです。
 これらは [Map Class](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) を継承しています。
-データベースの名前は、最大11文字までです。（11文字を超える場合は、自動的に切り捨てられます。）
+データベースの名前は、最大 11 文字までです。（11 文字を超える場合は、自動的に切り捨てられます。）
 
 # スコアボードデータベース
 
@@ -57,11 +57,11 @@ db.size: number
 
 ## 保存容量
 
-- keyは、最大 512 文字までです。（ 512 文字を超えるとエラーが発生します。）
-- valueは、最大 32,768 文字までです。（ 32,768 文字を文字を超えるとエラーが発生します。）
-- 保存できるデータの数は、最大 32,768 個までです。（ 32,768 個を超えるとエラーが発生します。）
-- すべてを合わせて 1,073,741,824 文字まで一つのデータベースに保存できます。
-- この保存容量はファイル内で変更できます。（保存可能な最大値を超えるとエラーが発生します。）
+-   key は、最大 512 文字までです。（ 512 文字を超えるとエラーが発生します。）
+-   value は、最大 32,768 文字までです。（ 32,768 文字を文字を超えるとエラーが発生します。）
+-   保存できるデータの数は、最大 32,768 個までです。（ 32,768 個を超えるとエラーが発生します。）
+-   すべてを合わせて 1,073,741,824 文字まで一つのデータベースに保存できます。
+-   この保存容量はファイル内で変更できます。
 
 # プレイヤープロパティデータベース
 
@@ -72,6 +72,10 @@ db.size: number
 ```ts
 import { world } from "@minecraft/server";
 import { PlayerPropertyDatabase } from "path/to/DatabaseMC.js";
+
+/* データベースを登録 */
+PlayerPropertyDatabase.register("database_name"): void
+
 const db = new PlayerPropertyDatabase("database_name");
 const player = world.getAllPlayers()[0]; // プレイヤーを取得
 
@@ -86,9 +90,6 @@ db.has(player): boolean
 
 /* データを削除 */
 db.delete(player): boolean
-
-/* すべてのデータを削除 */
-db.clear(): void
 
 /* すべてのkeyを取得 */
 db.keys(): IterableIterator<string>
@@ -118,7 +119,109 @@ db.size: number
 
 ## 保存容量
 
-- keyは、最大 512 文字までです。（ 512 文字を超えるとエラーが発生します。）
-- valueは、最大 131,054 文字までです。（ 131,054 文字を文字を超えるとエラーが発生します。）
-- 保存できるデータの数は、プレイヤー数に依存します。
-- すべてを合わせて 131,054 × プレイヤー数 文字まで一つのデータベースに保存できます。
+-   key は、最大 512 文字までです。（ 512 文字を超えるとエラーが発生します。）
+-   value は、最大 131,054 文字までです。（ 131,054 文字を文字を超えるとエラーが発生します。）
+-   保存できるデータの数は、プレイヤー数に依存します。
+-   すべてを合わせて 131,054 × プレイヤー数 文字まで一つのデータベースに保存できます。
+-   この保存容量はファイル内で変更できます。（保存可能な理論値を超えるとエラーが発生します。）
+
+# ワールドプロパティデータベース
+
+このデータベースは、ワールドに対するダイナミックプロパティを利用してデータを保存します。
+
+## データベースのメソッド
+
+```ts
+import { world } from "@minecraft/server";
+import { WorldPropertyDatabase } from "path/to/DatabaseMC.js";
+
+/* データベースを登録 */
+WorldPropertyDatabase.register("database_name"): void
+
+const db = new WorldPropertyDatabase("database_name");
+
+/* データを保存 */
+db.set("key", "value"): WorldPropertyDatabase
+
+/* データを取得 */
+db.get("key"): any | undefined
+
+/* データが存在するか確認 */
+db.has("key"): boolean
+
+/* データを削除 */
+db.delete("key"): boolean
+
+/* すべてのkeyを取得 */
+db.keys(): IterableIterator<string>
+
+/* すべてのvalueを取得 */
+db.values(): IterableIterator<any>
+
+/* すべてのkeyとvalueを取得 */
+
+db.entries(): IterableIterator<[string, any]>
+
+/* データベースをリロード */
+db.reload(): WorldPropertyDatabase
+
+/* すべてのデータに対して、コールバック関数を実行 */
+db.forEach(callbackfn: (value: any, key: any, map: WorldPropertyDatabase<string, any>) => void, thisArg?: any): void
+```
+
+## データベースのプロパティ
+
+```ts
+import { WorldPropertyDatabase } from "path/to/DatabaseMC.js";
+WorldPropertyDatabase.register("database_name");
+const db = new WorldPropertyDatabase("database_name");
+
+/* データの数 */
+db.size: number
+```
+
+## 保存容量
+
+-   key は、最大 512 文字までです。（ 512 文字を超えるとエラーが発生します。）
+-   value は、最大 102,400 文字までです。（ 102,400 文字を文字を超えるとエラーが発生します。）
+-   保存できるデータの数は、最大 10 個までです。（ 10 個を超えるとエラーが発生します。）
+-   すべてを合わせて 1,024,000 文字まで一つのデータベースに保存できます。
+-   この保存容量はファイル内で変更できます。（保存可能な理論値を超えるとエラーが発生します。）
+
+# アイテムデータベース
+
+このデータベースは、アイテムのロールを利用してデータを保存します。
+また、このデータベースは名前を持ちません。
+値の変更後はアイテムをセットする必要があります。
+
+## データベースのメソッド
+
+```ts
+import { world } from "@minecraft/server";
+import { ItemDatabase } from "path/to/DatabaseMC.js";
+const db = new ItemDatabase();
+
+const player = world.getAllPlayers()[0]; // プレイヤーを取得
+/** @type {Container} */
+const container = player.getComponent("inventory").container; // インベントリを取得
+const item = container.getSlot(player.selectedSlot).getItem(); // アイテムを取得
+
+/* データを保存 */
+db.set("key", "value"): ItemDatabase
+container.setItem(player.selectedSlot, item); // アイテムをセット（アイテムのロールが変わるので、アイテムのロールを変更したい場合は、この処理を行ってください。）
+
+/* データを取得 */
+db.get("key"): any | undefined
+
+/* データが存在するか確認 */
+db.has("key"): boolean
+
+/* データを削除 */
+db.delete("key"): boolean
+container.setItem(player.selectedSlot, item); // アイテムをセット（アイテムのロールが変わるので、アイテムのロールを変更したい場合は、この処理を行ってください。）
+```
+
+## 保存容量
+
+-   value は、最大 398 文字までです。（ 398 文字を文字を超えるとエラーが発生します。）
+-   この保存容量はファイル内で変更できます。（保存可能な理論値を超えるとエラーが発生します。）

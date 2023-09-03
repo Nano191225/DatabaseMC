@@ -18,6 +18,7 @@ import {
     DynamicPropertiesDefinition,
     MinecraftEntityTypes,
     ItemStack,
+    system,
 } from "@minecraft/server";
 
 const MAX_KEY_LENGTH = 512;
@@ -76,6 +77,17 @@ export class ScoreboardDatabase extends Database {
     }
 
     /**
+     * @returns {Promise<ScoreboardDatabase>}
+     */
+    public reloadAsync(): Promise<ScoreboardDatabase> {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.reload());
+            });
+        });
+    }
+
+    /**
      * @param {string} key
      * @returns {any | undefined}
      */
@@ -114,6 +126,19 @@ export class ScoreboardDatabase extends Database {
 
     /**
      * @param {string} key
+     * @param {any} value
+     * @returns {Promise<ScoreboardDatabase>}
+     */
+    public setAsync(key: string, value: any): Promise<this> {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.set(key, value));
+            });
+        });
+    }
+
+    /**
+     * @param {string} key
      * @returns {boolean}
      */
     public delete(key: string): boolean {
@@ -126,11 +151,31 @@ export class ScoreboardDatabase extends Database {
         return object.removeParticipant(participant);
     }
 
+    /**
+     * @param {string} key
+     * @returns {Promise<boolean>}
+     */
+    public deleteAsync(key: string): Promise<boolean> {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.delete(key));
+            });
+        });
+    }
+
     public clear(): void {
         const object = this.#getObject();
         world.scoreboard.removeObjective(object);
 
         super.clear();
+    }
+
+    public clearAsync(): Promise<void> {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.clear());
+            });
+        });
     }
 
     #keyCheck(key: string): void {
@@ -192,6 +237,17 @@ export class PlayerPropertyDatabase extends Database {
     }
 
     /**
+     * @returns {Promise<PlayerPropertyDatabase>}
+     */
+    public reloadAsync(): Promise<PlayerPropertyDatabase> {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.reload());
+            });
+        });
+    }
+
+    /**
      * @param {Player} key
      * @returns {any | undefined}
      */
@@ -201,7 +257,6 @@ export class PlayerPropertyDatabase extends Database {
     }
 
     /**
-     *
      * @param {Player} key
      * @param {any} value
      * @returns {PlayerPropertyDatabase}
@@ -211,6 +266,19 @@ export class PlayerPropertyDatabase extends Database {
         key.setDynamicProperty(this.#name, JSON.stringify(value));
         super.set(key.id, value);
         return this;
+    }
+
+    /**
+     * @param {Player} key
+     * @param {any} value
+     * @returns {Promise<PlayerPropertyDatabase>}
+     */
+    public setAsync(key: Player, value: any): Promise<this> {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.set(key, value));
+            });
+        });
     }
 
     /**
@@ -230,6 +298,18 @@ export class PlayerPropertyDatabase extends Database {
         this.#keyCheck(key);
         key.removeDynamicProperty(this.#name);
         return super.delete(key.id);
+    }
+
+    /**
+     * @param {Player} key
+     * @returns {Promise<boolean>}
+     */
+    public deleteAsync(key: Player): Promise<boolean> {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.delete(key));
+            });
+        });
     }
 
     /**
@@ -311,6 +391,17 @@ export class WorldPropertyDatabase extends Database {
     }
 
     /**
+     * @returns {Promise<WorldPropertyDatabase>}
+     */
+    public reloadAsync(): Promise<WorldPropertyDatabase> {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.reload());
+            });
+        });
+    }
+
+    /**
      * @param {string} key
      * @returns {any | undefined}
      */
@@ -352,6 +443,19 @@ export class WorldPropertyDatabase extends Database {
 
     /**
      * @param {string} key
+     * @param {any} value
+     * @returns {Promise<WorldPropertyDatabase>}
+     */
+    public setAsync(key: string, value: any): Promise<this> {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.set(key, value));
+            });
+        });
+    }
+
+    /**
+     * @param {string} key
      * @returns {boolean}
      */
     public has(key: string): boolean {
@@ -370,9 +474,29 @@ export class WorldPropertyDatabase extends Database {
         return super.delete(key);
     }
 
+    /**
+     * @param {string} key
+     * @returns {Promise<boolean>}
+     */
+    public deleteAsync(key: string): Promise<boolean> {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.delete(key));
+            });
+        });
+    }
+
     public clear(): void {
         world.setDynamicProperty(this.#name, JSON.stringify([]));
         super.clear();
+    }
+    
+    public clearAsync(): Promise<void> {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.clear());
+            });
+        });
     }
 
     #keyCheck(key: string): void {

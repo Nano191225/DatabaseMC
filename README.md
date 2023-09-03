@@ -16,6 +16,7 @@ const db = new ScoreboardDatabase("database_name");
 
 /* データを保存 */
 db.set("key", "value"): ScoreboardDatabase
+db.setAsync("key", "value"): Promise<ScoreboardDatabase>
 
 /* データを取得 */
 db.get("key"): any | undefined
@@ -25,9 +26,11 @@ db.has("key"): boolean
 
 /* データを削除 */
 db.delete("key"): boolean
+db.deleteAsync("key"): Promise<boolean>
 
 /* すべてのデータを削除 */
 db.clear(): void
+db.clearAsync(): Promise<void>
 
 /* すべてのkeyを取得 */
 db.keys(): IterableIterator<string>
@@ -40,6 +43,7 @@ db.entries(): IterableIterator<[string, any]>
 
 /* データベースをリロード */
 db.reload(): ScoreboardDatabase
+db.reloadAsync(): Promise<ScoreboardDatabase>
 
 /* すべてのデータに対して、コールバック関数を実行 */
 db.forEach(callbackfn: (value: any, key: any, map: ScoreboardDatabase<string, any>) => void, thisArg?: any): void
@@ -81,6 +85,7 @@ const player = world.getAllPlayers()[0]; // プレイヤーを取得
 
 /* データを保存 */
 db.set(player, "value"): PlayerPropertyDatabase
+db.setAsync(player, "value"): Promise<PlayerPropertyDatabase>
 
 /* データを取得 */
 db.get(player): any | undefined
@@ -90,6 +95,7 @@ db.has(player): boolean
 
 /* データを削除 */
 db.delete(player): boolean
+db.deleteAsync(player): Promise<boolean>
 
 /* すべてのkeyを取得 */
 db.keys(): IterableIterator<string>
@@ -102,6 +108,7 @@ db.entries(): IterableIterator<[string, any]>
 
 /* データベースをリロード */
 db.reload(): PlayerPropertyDatabase
+db.reloadAsync(): Promise<PlayerPropertyDatabase>
 
 /* すべてのデータに対して、コールバック関数を実行 */
 db.forEach(callbackfn: (value: any, key: any, map: PlayerPropertyDatabase<string, any>) => void, thisArg?: any): void
@@ -142,6 +149,7 @@ const db = new WorldPropertyDatabase("database_name");
 
 /* データを保存 */
 db.set("key", "value"): WorldPropertyDatabase
+db.setAsync("key", "value"): Promise<WorldPropertyDatabase>
 
 /* データを取得 */
 db.get("key"): any | undefined
@@ -151,6 +159,11 @@ db.has("key"): boolean
 
 /* データを削除 */
 db.delete("key"): boolean
+db.deleteAsync("key"): Promise<boolean>
+
+/* すべてのデータを削除 */
+db.clear(): void
+db.clearAsync(): Promise<void>
 
 /* すべてのkeyを取得 */
 db.keys(): IterableIterator<string>
@@ -159,11 +172,11 @@ db.keys(): IterableIterator<string>
 db.values(): IterableIterator<any>
 
 /* すべてのkeyとvalueを取得 */
-
 db.entries(): IterableIterator<[string, any]>
 
 /* データベースをリロード */
 db.reload(): WorldPropertyDatabase
+db.reloadAsync(): Promise<WorldPropertyDatabase>
 
 /* すべてのデータに対して、コールバック関数を実行 */
 db.forEach(callbackfn: (value: any, key: any, map: WorldPropertyDatabase<string, any>) => void, thisArg?: any): void

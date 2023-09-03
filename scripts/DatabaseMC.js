@@ -10,7 +10,7 @@
  * be automatically truncated.)
  * --------------------------------------------------------------------------
  */
-import { world, Player, DynamicPropertiesDefinition, MinecraftEntityTypes, ItemStack, } from "@minecraft/server";
+import { world, Player, DynamicPropertiesDefinition, MinecraftEntityTypes, ItemStack, system, } from "@minecraft/server";
 const MAX_KEY_LENGTH = 512;
 const MAX_SCOREBOARD_KEYS_LENGTH = 32768;
 const MAX_SCOREBOARD_VALUE_LENGTH = 32768;
@@ -57,6 +57,16 @@ export class ScoreboardDatabase extends Database {
         return this;
     }
     /**
+     * @returns {Promise<ScoreboardDatabase>}
+     */
+    reloadAsync() {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.reload());
+            });
+        });
+    }
+    /**
      * @param {string} key
      * @returns {any | undefined}
      */
@@ -84,6 +94,18 @@ export class ScoreboardDatabase extends Database {
     }
     /**
      * @param {string} key
+     * @param {any} value
+     * @returns {Promise<ScoreboardDatabase>}
+     */
+    setAsync(key, value) {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.set(key, value));
+            });
+        });
+    }
+    /**
+     * @param {string} key
      * @returns {boolean}
      */
     delete(key) {
@@ -94,10 +116,28 @@ export class ScoreboardDatabase extends Database {
             return false;
         return object.removeParticipant(participant);
     }
+    /**
+     * @param {string} key
+     * @returns {Promise<boolean>}
+     */
+    deleteAsync(key) {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.delete(key));
+            });
+        });
+    }
     clear() {
         const object = this.#getObject();
         world.scoreboard.removeObjective(object);
         super.clear();
+    }
+    clearAsync() {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.clear());
+            });
+        });
     }
     #keyCheck(key) {
         if (typeof key !== "string")
@@ -148,6 +188,16 @@ export class PlayerPropertyDatabase extends Database {
         return this;
     }
     /**
+     * @returns {Promise<PlayerPropertyDatabase>}
+     */
+    reloadAsync() {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.reload());
+            });
+        });
+    }
+    /**
      * @param {Player} key
      * @returns {any | undefined}
      */
@@ -156,7 +206,6 @@ export class PlayerPropertyDatabase extends Database {
         return super.get(key.id);
     }
     /**
-     *
      * @param {Player} key
      * @param {any} value
      * @returns {PlayerPropertyDatabase}
@@ -166,6 +215,18 @@ export class PlayerPropertyDatabase extends Database {
         key.setDynamicProperty(this.#name, JSON.stringify(value));
         super.set(key.id, value);
         return this;
+    }
+    /**
+     * @param {Player} key
+     * @param {any} value
+     * @returns {Promise<PlayerPropertyDatabase>}
+     */
+    setAsync(key, value) {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.set(key, value));
+            });
+        });
     }
     /**
      * @param {Player} key
@@ -183,6 +244,17 @@ export class PlayerPropertyDatabase extends Database {
         this.#keyCheck(key);
         key.removeDynamicProperty(this.#name);
         return super.delete(key.id);
+    }
+    /**
+     * @param {Player} key
+     * @returns {Promise<boolean>}
+     */
+    deleteAsync(key) {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.delete(key));
+            });
+        });
     }
     /**
      * Method is not available
@@ -244,6 +316,16 @@ export class WorldPropertyDatabase extends Database {
         return this;
     }
     /**
+     * @returns {Promise<WorldPropertyDatabase>}
+     */
+    reloadAsync() {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.reload());
+            });
+        });
+    }
+    /**
      * @param {string} key
      * @returns {any | undefined}
      */
@@ -272,6 +354,18 @@ export class WorldPropertyDatabase extends Database {
     }
     /**
      * @param {string} key
+     * @param {any} value
+     * @returns {Promise<WorldPropertyDatabase>}
+     */
+    setAsync(key, value) {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.set(key, value));
+            });
+        });
+    }
+    /**
+     * @param {string} key
      * @returns {boolean}
      */
     has(key) {
@@ -288,9 +382,27 @@ export class WorldPropertyDatabase extends Database {
         world.setDynamicProperty(this.#name, JSON.stringify(object));
         return super.delete(key);
     }
+    /**
+     * @param {string} key
+     * @returns {Promise<boolean>}
+     */
+    deleteAsync(key) {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.delete(key));
+            });
+        });
+    }
     clear() {
         world.setDynamicProperty(this.#name, JSON.stringify([]));
         super.clear();
+    }
+    clearAsync() {
+        return new Promise((resolve) => {
+            system.run(() => {
+                resolve(this.clear());
+            });
+        });
     }
     #keyCheck(key) {
         if (typeof key !== "string")
@@ -376,7 +488,7 @@ export class ItemDatabase extends Database {
     /**
      *
      * @param {ItemStack} key
-     * @returns
+     * @returns {boolean}
      */
     delete(key) {
         this.#keyCheck(key);

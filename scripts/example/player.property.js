@@ -1,7 +1,8 @@
+// @ts-check
 import { system, world } from "@minecraft/server";
 import { PlayerPropertyDatabase } from "../DatabaseMC.js";
 
-PlayerPropertyDatabase.register("test");
+PlayerPropertyDatabase.register("test", 1024);
 
 world.afterEvents.chatSend.subscribe((chatSend) => {
     const { sender: player, message } = chatSend;

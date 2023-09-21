@@ -78,7 +78,7 @@ import { world } from "@minecraft/server";
 import { PlayerPropertyDatabase } from "path/to/DatabaseMC.js";
 
 /* データベースを登録 */
-PlayerPropertyDatabase.register("database_name"): void
+PlayerPropertyDatabase.register("database_name", 1024): void // データベースの名前と保存容量を指定
 
 const db = new PlayerPropertyDatabase("database_name");
 const player = world.getAllPlayers()[0]; // プレイヤーを取得
@@ -127,9 +127,8 @@ db.size: number
 ## 保存容量
 
 -   key は、最大 512 文字までです。（ 512 文字を超えるとエラーが発生します。）
--   value は、最大 131,054 文字までです。（ 131,054 文字を文字を超えるとエラーが発生します。）
+-   value は、すべてのデータベースを合わせて最大 131,072 文字までです。（ 131,072 文字を文字を超えるとエラーが発生します。）
 -   保存できるデータの数は、プレイヤー数に依存します。
--   すべてを合わせて 131,054 × プレイヤー数 文字まで一つのデータベースに保存できます。
 -   この保存容量はファイル内で変更できます。（保存可能な理論値を超えるとエラーが発生します。）
 
 # ワールドプロパティデータベース
@@ -143,7 +142,7 @@ import { world } from "@minecraft/server";
 import { WorldPropertyDatabase } from "path/to/DatabaseMC.js";
 
 /* データベースを登録 */
-WorldPropertyDatabase.register("database_name"): void
+WorldPropertyDatabase.register("database_name", 32768): void // データベースの名前と保存容量を指定
 
 const db = new WorldPropertyDatabase("database_name");
 
@@ -196,9 +195,8 @@ db.size: number
 ## 保存容量
 
 -   key は、最大 512 文字までです。（ 512 文字を超えるとエラーが発生します。）
--   value は、最大 102,400 文字までです。（ 102,400 文字を文字を超えるとエラーが発生します。）
+-   value は、すべてのデータベースを合わせて最大 1,048,576 文字までです。（ 1,048,576 文字を文字を超えるとエラーが発生します。）
 -   保存できるデータの数は、最大 10 個までです。（ 10 個を超えるとエラーが発生します。）
--   すべてを合わせて 1,024,000 文字まで一つのデータベースに保存できます。
 -   この保存容量はファイル内で変更できます。（保存可能な理論値を超えるとエラーが発生します。）
 
 # アイテムデータベース

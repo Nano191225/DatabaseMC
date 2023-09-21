@@ -1,8 +1,11 @@
 /**
  * DatabaseMC
  * @license MIT
- * @author Nano191225
- * @version 1.0.0
+ * @author @Nano191225
+ * @version 1.0.1
+ * Supported Minecraft Version
+ * @version 1.20.30
+ * @description DatabaseMC is a database that can be used in Minecraft Script API.
  * --------------------------------------------------------------------------
  * These databases are available in the Script API of the integrated version
  * of Minecraft. They inherit from Map Class. Database names are limited to
@@ -10,13 +13,13 @@
  * be automatically truncated.)
  * --------------------------------------------------------------------------
  */
-import { world, Player, DynamicPropertiesDefinition, MinecraftEntityTypes, ItemStack, system, } from "@minecraft/server";
+import { world, Player, DynamicPropertiesDefinition, ItemStack, system, } from "@minecraft/server";
 const MAX_KEY_LENGTH = 512;
 const MAX_SCOREBOARD_KEYS_LENGTH = 32768;
 const MAX_SCOREBOARD_VALUE_LENGTH = 32768;
-const MAX_PLAYER_PROPERTY_VALUE_LENGTH = 131054;
+const MAX_PLAYER_PROPERTY_LENGTH = 131072;
 const MAX_WORLD_PROPERTY_KEYS_LENGTH = 10;
-const MAX_WORLD_PROPERTY_VALUE_LENGTH = 102400;
+const MAX_WORLD_PROPERTY_LENGTH = 1048576;
 const MAX_ITEM_LORE_LINE_LENGTH = 20;
 const MAX_ITEM_LORE_VALUE_LENGTH = 398;
 const PLAYER_PROPERTIES = [];
@@ -168,9 +171,9 @@ export class PlayerPropertyDatabase extends Database {
     constructor(name) {
         super(name);
         this.#name = name.slice(0, 11) + "_dbMC";
-        if (!PLAYER_PROPERTIES.includes(this.#name))
+        if (!PLAYER_PROPERTIES.map(v => v.name).includes(this.#name))
             throw new ReferenceError("Property is not registered");
-        if (MAX_PLAYER_PROPERTY_VALUE_LENGTH > 2 ** 17)
+        if (MAX_PLAYER_PROPERTY_LENGTH > 2 ** 17)
             throw new RangeError("Maximum value length must be 2^17 (131072) characters or less");
         this.reload();
     }
@@ -275,18 +278,19 @@ export class PlayerPropertyDatabase extends Database {
      * Register the database and make it available.
      * @static
      * @param {string} name
+     * @param {number} maxValue
      */
-    static register(name) {
+    static register(name, maxValue) {
         if (typeof name !== "string")
             throw new TypeError("Database name must be a string");
         if (name.search(/[^a-z0-9_]/gi) !== -1)
             throw new TypeError("Database name must only contain alphanumeric characters and underscores");
-        if (PLAYER_PROPERTIES.includes(name))
+        if (PLAYER_PROPERTIES.map(v => v.name).includes(name))
             throw new ReferenceError("Property is already registered");
         if (name.length > 11)
             console.warn(new RangeError("Database name must be 11 characters or less"));
         name = name.slice(0, 11) + "_dbMC";
-        PLAYER_PROPERTIES.push(name);
+        PLAYER_PROPERTIES.push({ name: name, max: maxValue });
     }
 }
 export class WorldPropertyDatabase extends Database {
@@ -297,9 +301,9 @@ export class WorldPropertyDatabase extends Database {
     constructor(name) {
         super(name);
         this.#name = name.slice(0, 11) + "_dbMC";
-        if (!WORLD_PROPERTIES.includes(this.#name))
+        if (!WORLD_PROPERTIES.map(v => v.name).includes(this.#name))
             throw new ReferenceError("Property is not registered");
-        if ((MAX_WORLD_PROPERTY_VALUE_LENGTH + MAX_KEY_LENGTH) *
+        if ((MAX_WORLD_PROPERTY_LENGTH + MAX_KEY_LENGTH) *
             MAX_WORLD_PROPERTY_KEYS_LENGTH >
             2 ** 20)
             throw new RangeError("Maximum value length must be 2^20 (1048576) characters or less");
@@ -343,8 +347,8 @@ export class WorldPropertyDatabase extends Database {
         if (this.size >= MAX_WORLD_PROPERTY_KEYS_LENGTH)
             throw new RangeError("The maximum number of entries has been exceeded");
         const string = JSON.stringify(value);
-        if (string.length > MAX_WORLD_PROPERTY_VALUE_LENGTH)
-            throw new RangeError(`Value must be ${MAX_WORLD_PROPERTY_VALUE_LENGTH} (now ${string.length}) characters or less (after JSON.stringify)`);
+        if (string.length > MAX_WORLD_PROPERTY_LENGTH)
+            throw new RangeError(`Value must be ${MAX_WORLD_PROPERTY_LENGTH} (now ${string.length}) characters or less (after JSON.stringify)`);
         this.delete(key);
         const object = this.#getObject();
         object.push([key, string]);
@@ -424,18 +428,19 @@ export class WorldPropertyDatabase extends Database {
      * Register the database and make it available.
      * @static
      * @param {string} name
+     * @param {number} maxValue
      */
-    static register(name) {
+    static register(name, maxValue) {
         if (typeof name !== "string")
             throw new TypeError("Database name must be a string");
         if (name.search(/[^a-z0-9_]/gi) !== -1)
             throw new TypeError("Database name must only contain alphanumeric characters and underscores");
-        if (WORLD_PROPERTIES.includes(name))
+        if (WORLD_PROPERTIES.map(v => v.name).includes(name))
             throw new ReferenceError("Property is already registered");
         if (name.length > 11)
             console.warn(new RangeError("Database name must be 11 characters or less"));
         name = name.slice(0, 11) + "_dbMC";
-        WORLD_PROPERTIES.push(name);
+        WORLD_PROPERTIES.push({ name: name, max: maxValue });
     }
 }
 export class ItemDatabase extends Database {
@@ -572,11 +577,11 @@ world.afterEvents.worldInitialize.subscribe(worldInitialize => {
     const _player = new DynamicPropertiesDefinition();
     const _world = new DynamicPropertiesDefinition();
     PLAYER_PROPERTIES.forEach(property => {
-        _player.defineString(property, MAX_PLAYER_PROPERTY_VALUE_LENGTH);
+        _player.defineString(property.name, property.max);
     });
     WORLD_PROPERTIES.forEach(property => {
-        _world.defineString(property, MAX_WORLD_PROPERTY_VALUE_LENGTH);
+        _world.defineString(property.name, property.max);
     });
-    worldInitialize.propertyRegistry.registerEntityTypeDynamicProperties(_player, MinecraftEntityTypes.player);
+    worldInitialize.propertyRegistry.registerEntityTypeDynamicProperties(_player, "minecraft:player");
     worldInitialize.propertyRegistry.registerWorldDynamicProperties(_world);
 });

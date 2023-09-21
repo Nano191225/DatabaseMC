@@ -1,3 +1,4 @@
+// @ts-check
 import { system, world } from "@minecraft/server";
 import { ScoreboardDatabase } from "../DatabaseMC.js";
 

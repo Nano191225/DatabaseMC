@@ -1,3 +1,4 @@
+// @ts-check
 import { Container, ItemStack, system, world } from "@minecraft/server";
 import { ItemDatabase } from "../DatabaseMC.js";
 
@@ -7,8 +8,13 @@ world.afterEvents.chatSend.subscribe(chatSend => {
     const args = message.split(" ");
     const command = args[0];
     /** @type {Container} */
-    const container = player.getComponent("inventory").container;
+    // @ts-ignore
+    const container = player.getComponent("inventory")?.container;
     const key = container.getSlot(player.selectedSlot).getItem();
+    if (!key) {
+        player.sendMessage("No item in hand");
+        return;
+    }
 
     const value = args.slice(1).join(" ");
     console.warn(command, key, value);
@@ -32,7 +38,7 @@ world.afterEvents.chatSend.subscribe(chatSend => {
             player.sendMessage("Key not found");
         }
     } else if (command === "-reload") {
-        db.reload();
+        player.sendMessage("This method is not implemented");
     } else if (command === "-keys") {
         player.sendMessage([...db.keys()].join(", "));
     } else if (command === "-values") {
@@ -50,23 +56,17 @@ world.afterEvents.chatSend.subscribe(chatSend => {
     } else if (command === "-size") {
         player.sendMessage(db.size.toString());
     } else if (command === "-forEach") {
-        db.forEach((value, key) => {
-            player.sendMessage(`${key}: ${value}`);
-        });
+        player.sendMessage("This method is not implemented");
+        // db.forEach((value, key) => {
+        //     player.sendMessage(`${key}: ${value}`);
+        // });
     } else if (command === "-help") {
         player.sendMessage(
             [
                 "-set <key> <value>",
                 "-get <key>",
                 "-delete <key>",
-                "-reload",
-                "-keys",
-                "-values",
-                "-entries",
-                "-clear",
-                "-has <key>",
-                "-size",
-                "-forEach",
+                "-has <key>"
             ].join("\n")
         );
     } else if (command === "-max") {

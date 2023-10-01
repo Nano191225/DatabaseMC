@@ -29,7 +29,7 @@ class Database extends Map {
         super();
         if (typeof name !== "string")
             throw new TypeError("Database name must be a string");
-        if (name.search(/[^a-z0-9_]/gi) !== -1)
+        if (name.search(/[^a-z0-9_-]/gi) !== -1)
             throw new TypeError("Database name must only contain alphanumeric characters and underscores");
         if (name.length > 11)
             console.warn(new RangeError("Database name must be 11 characters or less"));
@@ -145,7 +145,7 @@ export class ScoreboardDatabase extends Database {
     #keyCheck(key) {
         if (typeof key !== "string")
             throw new TypeError("Key must be a string");
-        if (key.search(/[^a-z0-9_]/gi) !== -1)
+        if (key.search(/[^a-z0-9_-]/gi) !== -1)
             throw new TypeError("Key must only contain alphanumeric characters and underscores");
         if (key.length > MAX_KEY_LENGTH)
             throw new RangeError(`Key must be ${MAX_KEY_LENGTH} characters or less`);
@@ -283,7 +283,7 @@ export class PlayerPropertyDatabase extends Database {
     static register(name, maxValue) {
         if (typeof name !== "string")
             throw new TypeError("Database name must be a string");
-        if (name.search(/[^a-z0-9_]/gi) !== -1)
+        if (name.search(/[^a-z0-9_-]/gi) !== -1)
             throw new TypeError("Database name must only contain alphanumeric characters and underscores");
         if (PLAYER_PROPERTIES.map(v => v.name).includes(name))
             throw new ReferenceError("Property is already registered");
@@ -411,7 +411,7 @@ export class WorldPropertyDatabase extends Database {
     #keyCheck(key) {
         if (typeof key !== "string")
             throw new TypeError("Key must be a string");
-        if (key.search(/[^a-z0-9_]/gi) !== -1)
+        if (key.search(/[^a-z0-9_-]/gi) !== -1)
             throw new TypeError("Key must only contain alphanumeric characters and underscores");
         if (key.length > MAX_KEY_LENGTH)
             throw new RangeError(`Key must be ${MAX_KEY_LENGTH} characters or less`);
@@ -433,7 +433,7 @@ export class WorldPropertyDatabase extends Database {
     static register(name, maxValue) {
         if (typeof name !== "string")
             throw new TypeError("Database name must be a string");
-        if (name.search(/[^a-z0-9_]/gi) !== -1)
+        if (name.search(/[^a-z0-9_-]/gi) !== -1)
             throw new TypeError("Database name must only contain alphanumeric characters and underscores");
         if (WORLD_PROPERTIES.map(v => v.name).includes(name))
             throw new ReferenceError("Property is already registered");

@@ -40,7 +40,7 @@ class Database extends Map {
 
         if (typeof name !== "string")
             throw new TypeError("Database name must be a string");
-        if (name.search(/[^a-z0-9_]/gi) !== -1)
+        if (name.search(/[^a-z0-9_-]/gi) !== -1)
             throw new TypeError(
                 "Database name must only contain alphanumeric characters and underscores"
             );
@@ -183,7 +183,7 @@ export class ScoreboardDatabase extends Database {
     #keyCheck(key: string): void {
         if (typeof key !== "string")
             throw new TypeError("Key must be a string");
-        if (key.search(/[^a-z0-9_]/gi) !== -1)
+        if (key.search(/[^a-z0-9_-]/gi) !== -1)
             throw new TypeError(
                 "Key must only contain alphanumeric characters and underscores"
             );
@@ -341,7 +341,7 @@ export class PlayerPropertyDatabase extends Database {
     static register(name: string, maxValue: number): void {
         if (typeof name !== "string")
             throw new TypeError("Database name must be a string");
-        if (name.search(/[^a-z0-9_]/gi) !== -1)
+        if (name.search(/[^a-z0-9_-]/gi) !== -1)
             throw new TypeError(
                 "Database name must only contain alphanumeric characters and underscores"
             );
@@ -505,7 +505,7 @@ export class WorldPropertyDatabase extends Database {
     #keyCheck(key: string): void {
         if (typeof key !== "string")
             throw new TypeError("Key must be a string");
-        if (key.search(/[^a-z0-9_]/gi) !== -1)
+        if (key.search(/[^a-z0-9_-]/gi) !== -1)
             throw new TypeError(
                 "Key must only contain alphanumeric characters and underscores"
             );
@@ -533,7 +533,7 @@ export class WorldPropertyDatabase extends Database {
     static register(name: string, maxValue: number): void {
         if (typeof name !== "string")
             throw new TypeError("Database name must be a string");
-        if (name.search(/[^a-z0-9_]/gi) !== -1)
+        if (name.search(/[^a-z0-9_-]/gi) !== -1)
             throw new TypeError(
                 "Database name must only contain alphanumeric characters and underscores"
             );

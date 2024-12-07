@@ -1,38 +1,39 @@
 {
-	"format_version": 2,
-	"header": {
-		"name": "DatabaseMC",
-		"description": "Developed by Nano191225.",
-		"uuid": "63df35e9-c9f6-41da-b794-65470e6116e4",
-		"version": [ 1, 0, 1 ],
-		"min_engine_version": [ 1, 20, 30 ]
-	},
-	"metadata": {
-		"authors": ["Nano191225"],
-		"url": "https://github.com/Nano191225/DatabaseMC"
-	},
-	"modules": [{
-			"type": "data",
-			"uuid": "bcdcf8f5-79e2-454c-a3c3-cc7e937c4f60",
-			"version": [ 1, 0, 0 ]
-		},
-		{
-			"description": "DatabaseMC",
-			"language": "javascript",
-			"type": "script",
-			"uuid": "0ad200cc-53f7-4ebf-a8b4-275cc7380521",
-			"version": [ 1, 0, 0 ],
-			"entry": "scripts/index.js"
-		}
-	],
-	"dependencies": [
-		{
-			"module_name": "@minecraft/server",
-			"version": "1.6.0-beta"
-		},
+    "format_version": 2,
+    "header": {
+        "name": "DatabaseMC",
+        "description": "Developed by Nano191225.",
+        "uuid": "63df35e9-c9f6-41da-b794-65470e6116e4",
+        "version": [1, 2, 0],
+        "min_engine_version": [1, 21, 50]
+    },
+    "metadata": {
+        "authors": ["Nano191225"],
+        "url": "https://github.com/Nano191225/DatabaseMC"
+    },
+    "modules": [
         {
-			"module_name": "@minecraft/server-ui",
-			"version": "1.2.0-beta"
-		}
-	]
+            "type": "data",
+            "uuid": "bcdcf8f5-79e2-454c-a3c3-cc7e937c4f60",
+            "version": [1, 0, 0]
+        },
+        {
+            "description": "DatabaseMC",
+            "language": "javascript",
+            "type": "script",
+            "uuid": "0ad200cc-53f7-4ebf-a8b4-275cc7380521",
+            "version": [1, 0, 0],
+            "entry": "scripts/index.js"
+        }
+    ],
+    "dependencies": [
+        {
+            "module_name": "@minecraft/server",
+            "version": "1.17.0-beta"
+        },
+        {
+            "module_name": "@minecraft/server-ui",
+            "version": "1.4.0-beta"
+        }
+    ]
 }

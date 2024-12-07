@@ -32,9 +32,6 @@ world.afterEvents.chatSend.subscribe((chatSend) => {
             player.sendMessage("Key not found");
         }
     }
-    else if (command === "!reload") {
-        db.reload();
-    }
     else if (command === "!keys") {
         player.sendMessage([...db.keys()].join(", "));
     }
@@ -63,7 +60,6 @@ world.afterEvents.chatSend.subscribe((chatSend) => {
             "!set <key> <value>",
             "!get <key>",
             "!delete <key>",
-            "!reload",
             "!keys",
             "!values",
             "!entries",

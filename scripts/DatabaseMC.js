@@ -4,7 +4,7 @@
  * @author @Nano191225
  * @version 1.2.0
  * Supported Minecraft Version
- * @version 1.21.50
+ * @version 1.21.70
  * @description DatabaseMC is a database that can be used in Minecraft Script API.
  * --------------------------------------------------------------------------
  * These databases are available in the Script API of the integrated version
@@ -36,9 +36,12 @@ class Database {
      * @throws {RangeError} If the name is longer than 11 characters (a warning is logged).
      */
     constructor(name) {
-        if (typeof name !== "string") throw new TypeError("Database name must be a string");
-        if (name.search(/[^a-z0-9_ -]/gi) !== -1) throw new TypeError("Database name must only contain alphanumeric characters and underscores");
-        if (name.length > 11) console.warn(new RangeError("Database name must be 11 characters or less"));
+        if (typeof name !== "string")
+            throw new TypeError("Database name must be a string");
+        if (name.search(/[^a-z0-9_ -]/gi) !== -1)
+            throw new TypeError("Database name must only contain alphanumeric characters and underscores");
+        if (name.length > 11)
+            console.warn(new RangeError("Database name must be 11 characters or less"));
         this.rawName = name;
         this.name = name.slice(0, 11) + "_dbMC";
         this.getMeta();
@@ -54,7 +57,8 @@ class Database {
         return new Promise((resolve, reject) => {
             try {
                 resolve(this.set(key, value));
-            } catch (error) {
+            }
+            catch (error) {
                 reject(error);
             }
         });
@@ -69,7 +73,8 @@ class Database {
         return new Promise((resolve, reject) => {
             try {
                 resolve(this.get(key));
-            } catch (error) {
+            }
+            catch (error) {
                 reject(error);
             }
         });
@@ -84,7 +89,8 @@ class Database {
         return new Promise((resolve, reject) => {
             try {
                 resolve(this.has(key));
-            } catch (error) {
+            }
+            catch (error) {
                 reject(error);
             }
         });
@@ -99,7 +105,8 @@ class Database {
         return new Promise((resolve, reject) => {
             try {
                 resolve(this.delete(key));
-            } catch (error) {
+            }
+            catch (error) {
                 reject(error);
             }
         });
@@ -113,7 +120,8 @@ class Database {
         return new Promise((resolve, reject) => {
             try {
                 resolve(this.clear());
-            } catch (error) {
+            }
+            catch (error) {
                 reject(error);
             }
         });
@@ -200,7 +208,8 @@ class Database {
                 name: this.rawName,
                 keys: {},
             };
-        } catch {
+        }
+        catch {
             this.meta = {
                 id: this.name,
                 name: this.rawName,
@@ -234,14 +243,16 @@ export class ScoreboardDatabase extends Database {
     MAX_KEYS_LENGTH = 32768;
     getObject() {
         const object = world.scoreboard.getObjective(this.meta.id);
-        if (object) return object;
+        if (object)
+            return object;
         world.scoreboard.addObjective(this.meta.id, this.meta.name);
         return this.getObject();
     }
     set(key, value) {
         this.keyCheck(key);
         const string = JSON.stringify(value);
-        if (string.length > this.MAX_VALUE_LENGTH) throw new RangeError(`Value length must be ${this.MAX_VALUE_LENGTH} characters or less`);
+        if (string.length > this.MAX_VALUE_LENGTH)
+            throw new RangeError(`Value length must be ${this.MAX_VALUE_LENGTH} characters or less`);
         this.delete(key);
         this.meta.keys[key] = string.length;
         this.updateMeta();
@@ -253,7 +264,8 @@ export class ScoreboardDatabase extends Database {
         const value = this.getObject()
             .getParticipants()
             .find((participant) => participant.displayName.startsWith(key + "§;"));
-        if (!value) return undefined;
+        if (!value)
+            return undefined;
         return JSON.parse(value.displayName.split("§;").slice(1).join("§;"));
     }
     has(key) {
@@ -264,10 +276,12 @@ export class ScoreboardDatabase extends Database {
     }
     delete(key) {
         this.keyCheck(key);
-        if (!this.has(key)) return false;
+        if (!this.has(key))
+            return false;
         const object = this.getObject();
         const participant = object.getParticipants().find((participant) => participant.displayName.startsWith(key + "§;"));
-        if (!participant) return false;
+        if (!participant)
+            return false;
         object.removeParticipant(participant);
         delete this.meta.keys[key];
         this.updateMeta();
@@ -286,7 +300,8 @@ export class WorldPropertyDatabase extends Database {
     set(key, value) {
         this.keyCheck(key);
         const string = JSON.stringify(value);
-        if (string.length > this.MAX_VALUE_LENGTH) throw new RangeError(`Value length must be ${this.MAX_VALUE_LENGTH} characters or less`);
+        if (string.length > this.MAX_VALUE_LENGTH)
+            throw new RangeError(`Value length must be ${this.MAX_VALUE_LENGTH} characters or less`);
         this.meta.keys[key] = string.length;
         this.updateMeta();
         world.setDynamicProperty(this.meta.id + "@" + key, string);
@@ -295,7 +310,8 @@ export class WorldPropertyDatabase extends Database {
     get(key) {
         this.keyCheck(key);
         const value = world.getDynamicProperty(this.meta.id + "@" + key);
-        if (!value) return undefined;
+        if (!value)
+            return undefined;
         return JSON.parse(value);
     }
     has(key) {
@@ -304,7 +320,8 @@ export class WorldPropertyDatabase extends Database {
     }
     delete(key) {
         this.keyCheck(key);
-        if (!this.has(key)) return false;
+        if (!this.has(key))
+            return false;
         world.setDynamicProperty(this.meta.id + "@" + key, undefined);
         delete this.meta.keys[key];
         this.updateMeta();

@@ -4,7 +4,7 @@
  * @author @Nano191225
  * @version 1.2.0
  * Supported Minecraft Version
- * @version 1.21.70
+ * @version 1.21.50
  * @description DatabaseMC is a database that can be used in Minecraft Script API.
  * --------------------------------------------------------------------------
  * These databases are available in the Script API of the integrated version
@@ -23,9 +23,11 @@ import { world } from "@minecraft/server";
  * @implements {Map<K, V>}
  */
 class Database {
+    ALLOWED_CHARACTERS = /[^0-9a-zA-Z!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~ ]/;
     name;
     rawName;
     meta;
+    metaKeys;
     /**
      * Creates an instance of the DatabaseMC class.
      *
@@ -38,7 +40,7 @@ class Database {
     constructor(name) {
         if (typeof name !== "string")
             throw new TypeError("Database name must be a string");
-        if (name.search(/[^a-z0-9_ -]/gi) !== -1)
+        if (name.search(this.ALLOWED_CHARACTERS) !== -1)
             throw new TypeError("Database name must only contain alphanumeric characters and underscores");
         if (name.length > 11)
             console.warn(new RangeError("Database name must be 11 characters or less"));
@@ -195,7 +197,7 @@ class Database {
             throw new TypeError("Key must be a string, number, or symbol");
         if (typeof key === "string" && key.length > this.MAX_KEY_LENGTH)
             throw new RangeError(`Key length must be ${this.MAX_KEY_LENGTH} characters or less`);
-        if (typeof key === "string" && key.search(/[^a-z0-9_ -]/gi) !== -1)
+        if (typeof key === "string" && key.search(this.ALLOWED_CHARACTERS) !== -1)
             throw new TypeError("Key must only contain alphanumeric characters and underscores");
     }
     /**
@@ -206,15 +208,21 @@ class Database {
             this.meta = JSON.parse(world.getDynamicProperty(this.name)) || {
                 id: this.name,
                 name: this.rawName,
-                keys: {},
+                keys: 0,
             };
+            let chunks = [];
+            for (let i = 0; i < this.meta.keys; i++) {
+                chunks.push(world.getDynamicProperty(`${this.name}[${i}]`));
+            }
+            this.metaKeys = JSON.parse(chunks.join(""));
         }
         catch {
             this.meta = {
                 id: this.name,
                 name: this.rawName,
-                keys: {},
+                keys: 0,
             };
+            this.metaKeys = {};
         }
     }
     /**
@@ -223,6 +231,12 @@ class Database {
      * @returns void
      */
     setMeta() {
+        const str = JSON.stringify(this.meta);
+        const chunks = str.match(/.{1,30000}/g) ?? [];
+        for (let i = 0; i < chunks.length; i++) {
+            world.setDynamicProperty(`${this.name}[${i}]`, chunks[i]);
+        }
+        this.meta.keys = chunks.length;
         world.setDynamicProperty(this.name, JSON.stringify(this.meta));
     }
     /**
@@ -254,7 +268,7 @@ export class ScoreboardDatabase extends Database {
         if (string.length > this.MAX_VALUE_LENGTH)
             throw new RangeError(`Value length must be ${this.MAX_VALUE_LENGTH} characters or less`);
         this.delete(key);
-        this.meta.keys[key] = string.length;
+        this.metaKeys[key] = string.length;
         this.updateMeta();
         this.getObject().setScore(key + "§;" + string, 0);
         return this;
@@ -283,13 +297,13 @@ export class ScoreboardDatabase extends Database {
         if (!participant)
             return false;
         object.removeParticipant(participant);
-        delete this.meta.keys[key];
+        delete this.metaKeys[key];
         this.updateMeta();
         return true;
     }
     clear() {
         world.scoreboard.removeObjective(this.meta.id);
-        this.meta.keys = {};
+        this.metaKeys = {};
         this.updateMeta();
     }
 }
@@ -302,7 +316,7 @@ export class WorldPropertyDatabase extends Database {
         const string = JSON.stringify(value);
         if (string.length > this.MAX_VALUE_LENGTH)
             throw new RangeError(`Value length must be ${this.MAX_VALUE_LENGTH} characters or less`);
-        this.meta.keys[key] = string.length;
+        this.metaKeys[key] = string.length;
         this.updateMeta();
         world.setDynamicProperty(this.meta.id + "@" + key, string);
         return this;
@@ -323,7 +337,7 @@ export class WorldPropertyDatabase extends Database {
         if (!this.has(key))
             return false;
         world.setDynamicProperty(this.meta.id + "@" + key, undefined);
-        delete this.meta.keys[key];
+        delete this.metaKeys[key];
         this.updateMeta();
         return true;
     }
@@ -331,7 +345,8 @@ export class WorldPropertyDatabase extends Database {
         for (const key of this.keys()) {
             world.setDynamicProperty(this.meta.id + "@" + key, undefined);
         }
-        this.meta.keys = {};
+        this.metaKeys = {};
         this.updateMeta();
     }
 }
+//# sourceMappingURL=DatabaseMC.js.map

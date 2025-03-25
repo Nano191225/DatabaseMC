@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc && uglifyjs scripts/DatabaseMC.js -o scripts/DatabaseMC.min.js -c --source-map"
+    "build": "pnpm i && tsc && uglifyjs scripts/DatabaseMC.js -o scripts/DatabaseMC.min.js -c --source-map"
   },
   "repository": {
     "type": "git",

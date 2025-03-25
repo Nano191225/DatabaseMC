@@ -4,7 +4,7 @@
  * @author @Nano191225
  * @version 1.2.0
  * Supported Minecraft Version
- * @version 1.21.50
+ * @version 1.21.70
  * @description DatabaseMC is a database that can be used in Minecraft Script API.
  * --------------------------------------------------------------------------
  * These databases are available in the Script API of the integrated version

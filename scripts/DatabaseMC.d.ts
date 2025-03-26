@@ -2,7 +2,7 @@
  * DatabaseMC
  * @license MIT
  * @author @Nano191225
- * @version 1.2.0
+ * @version 1.2.1
  * Supported Minecraft Version
  * @version 1.21.70
  * @description DatabaseMC is a database that can be used in Minecraft Script API.
@@ -13,7 +13,7 @@
  * be automatically truncated.)
  * --------------------------------------------------------------------------
  */
-interface Meta<K extends string | number | symbol> {
+interface Meta {
     id: string;
     name: string;
     keys: number;
@@ -34,7 +34,7 @@ declare abstract class Database<K extends string | number | symbol, V> implement
     protected readonly ALLOWED_CHARACTERS: RegExp;
     protected name: string;
     protected rawName: string;
-    protected meta: Meta<K>;
+    protected meta: Meta;
     protected metaKeys: MetaKeys<K>;
     /**
      * Creates an instance of the DatabaseMC class.
@@ -211,6 +211,13 @@ declare abstract class Database<K extends string | number | symbol, V> implement
      * @protected
      */
     protected updateMeta(): void;
+    /**
+     * Removes metadata for the current database instance.
+     * This method deletes the metadata and all associated keys.
+     *
+     * @protected
+     */
+    protected deleteMeta(): void;
 }
 export declare class ScoreboardDatabase<K, V> extends Database<string, V> {
     protected readonly MAX_KEY_LENGTH: number;
@@ -232,5 +239,6 @@ export declare class WorldPropertyDatabase<K, V> extends Database<string, V> {
     has(key: string): boolean;
     delete(key: string): boolean;
     clear(): void;
+    private getKey;
 }
 export {};

@@ -2,7 +2,7 @@
  * DatabaseMC
  * @license MIT
  * @author @Nano191225
- * @version 1.2.0
+ * @version 1.2.1
  * Supported Minecraft Version
  * @version 1.21.70
  * @description DatabaseMC is a database that can be used in Minecraft Script API.
@@ -16,7 +16,7 @@
 
 import { ScoreboardObjective, world } from "@minecraft/server";
 
-interface Meta<K extends string | number | symbol> {
+interface Meta {
     id: string;
     name: string;
     keys: number;
@@ -39,7 +39,7 @@ abstract class Database<K extends string | number | symbol, V> implements Map<K,
     protected readonly ALLOWED_CHARACTERS: RegExp = /[^0-9a-zA-Z!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~ ]/;
     protected name!: string;
     protected rawName!: string;
-    protected meta!: Meta<K>;
+    protected meta!: Meta;
     protected metaKeys!: MetaKeys<K>;
 
     /**
@@ -224,7 +224,7 @@ abstract class Database<K extends string | number | symbol, V> implements Map<K,
      * @returns {IterableIterator<K>} An iterator that yields all keys in the map.
      */
     public keys(): IterableIterator<K> {
-        const keys = Object.keys(this.meta.keys);
+        const keys = Object.keys(this.metaKeys);
         return keys[Symbol.iterator]() as IterableIterator<K>;
     }
 
@@ -313,6 +313,7 @@ abstract class Database<K extends string | number | symbol, V> implements Map<K,
             for (let i = 0; i < this.meta.keys; i++) {
                 chunks.push(world.getDynamicProperty(`${this.name}[${i}]`) as string);
             }
+            console.warn(chunks.join(""));
             this.metaKeys = JSON.parse(chunks.join(""));
         } catch {
             this.meta = {
@@ -330,7 +331,7 @@ abstract class Database<K extends string | number | symbol, V> implements Map<K,
      * @returns void
      */
     protected setMeta(): void {
-        const str = JSON.stringify(this.meta);
+        const str = JSON.stringify(this.metaKeys);
         const chunks: string[] = str.match(/.{1,30000}/g) ?? [];
 
         for (let i = 0; i < chunks.length; i++) {
@@ -351,6 +352,19 @@ abstract class Database<K extends string | number | symbol, V> implements Map<K,
     protected updateMeta(): void {
         this.setMeta();
         this.getMeta();
+    }
+
+    /**
+     * Removes metadata for the current database instance.
+     * This method deletes the metadata and all associated keys.
+     *
+     * @protected
+     */
+    protected deleteMeta(): void {
+        world.setDynamicProperty(this.name, undefined);
+        for (let i = 0; i < this.meta.keys; i++) {
+            world.setDynamicProperty(`${this.name}[${i}]`, undefined);
+        }
     }
 }
 
@@ -417,8 +431,7 @@ export class ScoreboardDatabase<K, V> extends Database<string, V> {
 
     public clear(): void {
         world.scoreboard.removeObjective(this.meta.id);
-        this.metaKeys = {} as Record<string, number>;
-        this.updateMeta();
+        this.deleteMeta();
     }
 }
 
@@ -436,7 +449,7 @@ export class WorldPropertyDatabase<K, V> extends Database<string, V> {
         this.metaKeys[key] = string.length;
         this.updateMeta();
 
-        world.setDynamicProperty(this.meta.id + "@" + key, string);
+        world.setDynamicProperty(this.getKey(key), string);
 
         return this;
     }
@@ -444,7 +457,7 @@ export class WorldPropertyDatabase<K, V> extends Database<string, V> {
     public get(key: string): V | undefined {
         this.keyCheck(key);
 
-        const value = world.getDynamicProperty(this.meta.id + "@" + key) as string;
+        const value = world.getDynamicProperty(this.getKey(key)) as string;
         if (!value) return undefined;
 
         return JSON.parse(value);
@@ -452,7 +465,7 @@ export class WorldPropertyDatabase<K, V> extends Database<string, V> {
 
     public has(key: string): boolean {
         this.keyCheck(key);
-        return world.getDynamicProperty(this.meta.id + "@" + key) !== undefined;
+        return world.getDynamicProperty(this.getKey(key)) !== undefined;
     }
 
     public delete(key: string): boolean {
@@ -460,7 +473,7 @@ export class WorldPropertyDatabase<K, V> extends Database<string, V> {
 
         if (!this.has(key)) return false;
 
-        world.setDynamicProperty(this.meta.id + "@" + key, undefined);
+        world.setDynamicProperty(this.getKey(key), undefined);
         delete this.metaKeys[key];
         this.updateMeta();
 
@@ -469,9 +482,12 @@ export class WorldPropertyDatabase<K, V> extends Database<string, V> {
 
     public clear(): void {
         for (const key of this.keys()) {
-            world.setDynamicProperty(this.meta.id + "@" + key, undefined);
+            world.setDynamicProperty(this.getKey(key), undefined);
         }
-        this.metaKeys = {} as Record<string, number>;
-        this.updateMeta();
+        this.deleteMeta();
+    }
+
+    private getKey(key: string): string {
+        return this.meta.id + "@" + key;
     }
 }

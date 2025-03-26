@@ -2,7 +2,7 @@
  * DatabaseMC
  * @license MIT
  * @author @Nano191225
- * @version 1.2.0
+ * @version 1.2.1
  * Supported Minecraft Version
  * @version 1.21.70
  * @description DatabaseMC is a database that can be used in Minecraft Script API.
@@ -133,7 +133,7 @@ class Database {
      * @returns {IterableIterator<K>} An iterator that yields all keys in the map.
      */
     keys() {
-        const keys = Object.keys(this.meta.keys);
+        const keys = Object.keys(this.metaKeys);
         return keys[Symbol.iterator]();
     }
     /**
@@ -214,6 +214,7 @@ class Database {
             for (let i = 0; i < this.meta.keys; i++) {
                 chunks.push(world.getDynamicProperty(`${this.name}[${i}]`));
             }
+            console.warn(chunks.join(""));
             this.metaKeys = JSON.parse(chunks.join(""));
         }
         catch {
@@ -231,7 +232,7 @@ class Database {
      * @returns void
      */
     setMeta() {
-        const str = JSON.stringify(this.meta);
+        const str = JSON.stringify(this.metaKeys);
         const chunks = str.match(/.{1,30000}/g) ?? [];
         for (let i = 0; i < chunks.length; i++) {
             world.setDynamicProperty(`${this.name}[${i}]`, chunks[i]);
@@ -249,6 +250,18 @@ class Database {
     updateMeta() {
         this.setMeta();
         this.getMeta();
+    }
+    /**
+     * Removes metadata for the current database instance.
+     * This method deletes the metadata and all associated keys.
+     *
+     * @protected
+     */
+    deleteMeta() {
+        world.setDynamicProperty(this.name, undefined);
+        for (let i = 0; i < this.meta.keys; i++) {
+            world.setDynamicProperty(`${this.name}[${i}]`, undefined);
+        }
     }
 }
 export class ScoreboardDatabase extends Database {
@@ -303,8 +316,7 @@ export class ScoreboardDatabase extends Database {
     }
     clear() {
         world.scoreboard.removeObjective(this.meta.id);
-        this.metaKeys = {};
-        this.updateMeta();
+        this.deleteMeta();
     }
 }
 export class WorldPropertyDatabase extends Database {
@@ -318,35 +330,37 @@ export class WorldPropertyDatabase extends Database {
             throw new RangeError(`Value length must be ${this.MAX_VALUE_LENGTH} characters or less`);
         this.metaKeys[key] = string.length;
         this.updateMeta();
-        world.setDynamicProperty(this.meta.id + "@" + key, string);
+        world.setDynamicProperty(this.getKey(key), string);
         return this;
     }
     get(key) {
         this.keyCheck(key);
-        const value = world.getDynamicProperty(this.meta.id + "@" + key);
+        const value = world.getDynamicProperty(this.getKey(key));
         if (!value)
             return undefined;
         return JSON.parse(value);
     }
     has(key) {
         this.keyCheck(key);
-        return world.getDynamicProperty(this.meta.id + "@" + key) !== undefined;
+        return world.getDynamicProperty(this.getKey(key)) !== undefined;
     }
     delete(key) {
         this.keyCheck(key);
         if (!this.has(key))
             return false;
-        world.setDynamicProperty(this.meta.id + "@" + key, undefined);
+        world.setDynamicProperty(this.getKey(key), undefined);
         delete this.metaKeys[key];
         this.updateMeta();
         return true;
     }
     clear() {
         for (const key of this.keys()) {
-            world.setDynamicProperty(this.meta.id + "@" + key, undefined);
+            world.setDynamicProperty(this.getKey(key), undefined);
         }
-        this.metaKeys = {};
-        this.updateMeta();
+        this.deleteMeta();
+    }
+    getKey(key) {
+        return this.meta.id + "@" + key;
     }
 }
 //# sourceMappingURL=DatabaseMC.js.map

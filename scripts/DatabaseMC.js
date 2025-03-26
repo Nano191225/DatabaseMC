@@ -2,7 +2,7 @@
  * DatabaseMC
  * @license MIT
  * @author @Nano191225
- * @version 1.2.1
+ * @version 1.2.2
  * Supported Minecraft Version
  * @version 1.21.70
  * @description DatabaseMC is a database that can be used in Minecraft Script API.
@@ -214,7 +214,6 @@ class Database {
             for (let i = 0; i < this.meta.keys; i++) {
                 chunks.push(world.getDynamicProperty(`${this.name}[${i}]`));
             }
-            console.warn(chunks.join(""));
             this.metaKeys = JSON.parse(chunks.join(""));
         }
         catch {
